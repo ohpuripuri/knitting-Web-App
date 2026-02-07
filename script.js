@@ -71,21 +71,53 @@ function createResultCard(stitch) {
         `;
     }
     
+    // 動画用のユニークIDを生成
+    const videoId = 'video_' + Math.random().toString(36).substr(2, 9);
+    
     return `
         <div class="result-card">
             <h2>${stitch.name}</h2>
             <p>${stitch.description}</p>
-            <div class="video-container">
+            <div class="video-container" onclick="openModal('${videoId}')" title="クリックで拡大表示">
+                <div id="${videoId}" style="display:none;">${stitch.embedCode}</div>
                 ${stitch.embedCode}
             </div>
         </div>
     `;
 }
 
+// モーダルを開く
+function openModal(videoId) {
+    const modal = document.getElementById('videoModal');
+    const modalContainer = document.getElementById('modalVideoContainer');
+    const videoElement = document.getElementById(videoId);
+    
+    // 埋め込みコードをモーダルにコピー
+    modalContainer.innerHTML = videoElement.innerHTML;
+    modal.style.display = 'block';
+    
+    // bodyのスクロールを無効化
+    document.body.style.overflow = 'hidden';
+}
+
+// モーダルを閉じる
+function closeModal() {
+    const modal = document.getElementById('videoModal');
+    const modalContainer = document.getElementById('modalVideoContainer');
+    
+    modal.style.display = 'none';
+    modalContainer.innerHTML = ''; // 動画を削除(再生停止)
+    
+    // bodyのスクロールを有効化
+    document.body.style.overflow = 'auto';
+}
+
 // イベントリスナー
 document.addEventListener('DOMContentLoaded', function() {
     const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('searchInput');
+    const modal = document.getElementById('videoModal');
+    const closeBtn = document.getElementsByClassName('close')[0];
     
     // 検索ボタンクリック
     searchButton.addEventListener('click', searchStitch);
@@ -94,6 +126,23 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             searchStitch();
+        }
+    });
+    
+    // ×ボタンでモーダルを閉じる
+    closeBtn.addEventListener('click', closeModal);
+    
+    // 背景クリックでモーダルを閉じる
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // ESCキーでモーダルを閉じる
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
         }
     });
     
